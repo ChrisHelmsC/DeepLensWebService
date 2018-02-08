@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.189.0.min.js"></script>
   	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Elastic Beanstalk</title>
     <style>
@@ -11,8 +12,64 @@
     	margin-left: 300px;
       }
     </style>
+	<script>
+	function configureS3() {
+		var albumBucketName = 'aionedge-master-faces';
+		var bucketRegion = 'us-east-1';
+		var IdentityPoolId = 'us-east-1:79768b68-43d0-4acc-8954-e89984a0f520';
+		
+		AWS.config.update({
+		region: bucketRegion,
+		credentials: new AWS.CognitoIdentityCredentials({
+			IdentityPoolId: IdentityPoolId
+		})
+		});
+		
+		var s3 = new AWS.S3({
+		apiVersion: '2006-03-01',
+		params: {Bucket: albumBucketName}
+		});
+		
+		return s3;
+	}
+	
+	
+	// could pass name of album to this function for specifying diff families
+	function addPhoto() {
+	
+	var s3 = configureS3();
+	
+	var albumName = 'FamilyName';
+	var files = document.getElementById('photoupload').files;
+	if (!files.length) {
+		return alert('Please choose a file to upload first.');
+	}
+	var file = files[0];
+	var fileName = file.name;
+	var albumPhotosKey = encodeURIComponent(albumName) + '//';
+	
+	var photoKey = albumPhotosKey + fileName;
+	s3.upload({
+		Key: photoKey,
+		Body: file,
+		ACL: 'public-read'
+	}, function(err, data) {
+		if (err) {
+		return alert('There was an error uploading your photo: ', err.message);
+		}
+		alert('Successfully uploaded photo.');
+		viewAlbum(albumName);
+	});
+	}
+	</script>
   </head>
   <body>
+	<div>
+		<label class="btn btn-default btn-file">
+			<input id="photoidupload" type="file" style="background: white; outline: black; display: block;">
+		</label>
+	</div>
+	<button type="submit" onclick="addPhoto();"> Submit </button>
   	<div class="form-group">
   		<label for="usr">Name:</label>
   		<input type="text" class="form-control" id="usr">
