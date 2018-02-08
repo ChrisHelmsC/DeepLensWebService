@@ -127,7 +127,7 @@
 	}
 	var file = files[0];
 	var fileName = file.name;
-	var albumPhotosKey = encodeURIComponent(albumName) + '//';
+	var albumPhotosKey = encodeURIComponent(albumName) + '/';
 	
 	var photoKey = albumPhotosKey + fileName;
 	s3.upload({
@@ -136,7 +136,7 @@
 		ACL: 'public-read'
 	}, function(err, data) {
 		if (err) {
-		return alert('There was an error uploading your photo: ', err.message);
+		  alert('There was an error uploading your photo: ', err.message);
 		}
 		alert('Successfully uploaded photo.');
 		viewAlbum(albumName);
@@ -147,16 +147,18 @@
   <body>
     <div class="form-style-6 container">
       <h1>Welcome to AiOnEdge</h1>
-      <form>
-        <div class="row">
+
+      <div class="row">
           <div class="col-md-12">
             <div>
-          <label class="btn btn-default btn-file">
-            <input id="photoidupload" type="file" style="background: white; outline: black; display: block;">
-          </label>
-        </div>
+              <label class="btn btn-default btn-file">
+                <input id="photoupload" type="file" style="background: white; outline: black; display: block;">
+              </label>
+            </div>
           </div>
         </div>
+
+      <form>
         <div class="row">
           <div class="col-md-6">
           	<div class="form-group">
@@ -168,7 +170,7 @@
           <div class="col-md-6">
            <div class="form-group">
               <label for="usr">Last Name:</label>
-              <input type="text" class="form-control field-style field-split align-left"" id="last_name ">
+              <input type="text" class="form-control field-style field-split align-left" id="last_name">
             </div>
           </div>
         </div>
@@ -182,12 +184,13 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-12">
-            <input type="submit" onclick="addPhoto();" value="Submit" />
-          </div>
-        </div>
         </form>
+
+        <div class="row">
+            <div class="col-md-12">
+              <input type="submit" onclick="addPhoto();" value="Submit" />
+            </div>
+          </div>
      </div>
   </body>
 </html>
