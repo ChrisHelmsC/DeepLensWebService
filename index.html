@@ -120,13 +120,18 @@
 	
 	var s3 = configureS3();
 	
-	var albumName = 'FamilyName';
+	var firstName = document.getElementById('first_name').value;
+	var lastName = document.getElementById('last_name').value;
+	var biography = document.getElementById('biography').value;
+	
+	var albumName = lastName;
+	
 	var files = document.getElementById('photoupload').files;
 	if (!files.length) {
 		return alert('Please choose a file to upload first.');
 	}
 	var file = files[0];
-	var fileName = file.name;
+	var fileName = firstName+lastName+".png";
 	var albumPhotosKey = encodeURIComponent(albumName) + '/';
 	
 	var photoKey = albumPhotosKey + fileName;
@@ -139,14 +144,41 @@
 		  alert('There was an error uploading your photo: ', err.message);
 		}
 		alert('Successfully uploaded photo.');
-		viewAlbum(albumName);
+	});
+	
+	var textFileName = firstName + lastName + 'Information.txt';
+	var textKey = albumPhotosKey + textFileName;
+	
+	lastName = lastName + "\n";
+	firstName = firstName + "\n";
+	biography = biography + "\n";
+	
+	console.log(firstName);
+	console.log(lastName);
+	console.log(biography);
+	
+	var fileType = "text/plain";
+	
+	
+	
+	const newTextFile = new File([firstName,lastName,biography], textFileName, {type:fileType});
+	
+	s3.upload({
+		Key: textKey,
+		Body: newTextFile,
+		ACL: 'public-read'
+	}, function(err, data) {
+		if (err) {
+		  alert('There was an error uploading your text file: ', err.message);
+		}
+		alert('Successfully uploaded text file.');
 	});
 	}
 	</script>
   </head>
   <body>
     <div class="form-style-6 container">
-      <h1>Welcome to AiOnEdge</h1>
+      <h1>Welcome to the DeepLens Family Assistant</h1>
 
       <div class="row">
           <div class="col-md-12">
@@ -163,7 +195,7 @@
           <div class="col-md-6">
           	<div class="form-group">
           		<label for="usr">First Name:</label>
-           		<input type="text" class="form-control field-style field-split align-left"" id="first_name ">
+           		<input type="text" class="form-control field-style field-split align-left" id="first_name">
             </div>
           </div>
 
@@ -188,7 +220,7 @@
 
         <div class="row">
             <div class="col-md-12">
-              <input type="submit" onclick="addPhoto();" value="Submit" />
+              <input type="submit" onclick="addPhoto();"/>
             </div>
           </div>
      </div>
