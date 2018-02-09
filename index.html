@@ -74,7 +74,8 @@
 }
 
 .form-style-6 input[type="submit"],
-.form-style-6 input[type="button"]{
+.form-style-6 input[type="button"],
+.custom-file-upload{
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -88,61 +89,29 @@
     color: #fff;
 }
 .form-style-6 input[type="submit"]:hover,
-.form-style-6 input[type="button"]:hover{
+.form-style-6 input[type="button"]:hover,
+.custom-file-upload:hover{
     background: #2EBC99;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    width: initial;
+    margin-bottom: 15px;
+}
+
+.file_preview {
+  display: inline-block;
+  margin-left: 15px;
 }
       
     </style>
-	<script>
-	function configureS3() {
-		var albumBucketName = 'aionedge-master-faces';
-		var bucketRegion = 'us-east-1';
-		var IdentityPoolId = 'us-east-1:79768b68-43d0-4acc-8954-e89984a0f520';
-		
-		AWS.config.update({
-		region: bucketRegion,
-		credentials: new AWS.CognitoIdentityCredentials({
-			IdentityPoolId: IdentityPoolId
-		})
-		});
-		
-		var s3 = new AWS.S3({
-		apiVersion: '2006-03-01',
-		params: {Bucket: albumBucketName}
-		});
-		
-		return s3;
-	}
-	
-	
-	// could pass name of album to this function for specifying diff families
-	function addPhoto() {
-	
-	var s3 = configureS3();
-	
-	var albumName = 'FamilyName';
-	var files = document.getElementById('photoupload').files;
-	if (!files.length) {
-		return alert('Please choose a file to upload first.');
-	}
-	var file = files[0];
-	var fileName = file.name;
-	var albumPhotosKey = encodeURIComponent(albumName) + '/';
-	
-	var photoKey = albumPhotosKey + fileName;
-	s3.upload({
-		Key: photoKey,
-		Body: file,
-		ACL: 'public-read'
-	}, function(err, data) {
-		if (err) {
-		  alert('There was an error uploading your photo: ', err.message);
-		}
-		alert('Successfully uploaded photo.');
-		viewAlbum(albumName);
-	});
-	}
-	</script>
   </head>
   <body>
     <div class="form-style-6 container">
@@ -151,14 +120,17 @@
       <div class="row">
           <div class="col-md-12">
             <div>
-              <label class="btn btn-default btn-file">
-                <input id="photoupload" type="file" style="background: white; outline: black; display: block;">
+              <label class="custom-file-upload">
+                Select Photo
+                <input id="photoupload" type="file" accept=".jpg, .jpeg, .png">
               </label>
+              <div class="file_preview">
+                <span id='file_preview_text'>No picture selected.</span>
+              </div>
             </div>
           </div>
         </div>
 
-      <form>
         <div class="row">
           <div class="col-md-6">
           	<div class="form-group">
@@ -193,4 +165,71 @@
           </div>
      </div>
   </body>
+
+  <script>
+    //Set up file inputs
+    var input = document.querySelector('#photoupload');
+    var span = document.querySelector('#file_preview_text');
+    //Attach event listener for when 
+    input.addEventListener('change', updateImageDisplay);
+
+    //Updates image preview text when image is selected
+  function updateImageDisplay() {
+    var curFiles = input.files;
+    if(curFiles.length === 0) {
+      span.textContent = 'No picture selected.';
+    } else {
+      span.textContent = curFiles[0].name;
+    }
+  }
+
+  function configureS3() {
+    var albumBucketName = 'aionedge-master-faces';
+    var bucketRegion = 'us-east-1';
+    var IdentityPoolId = 'us-east-1:79768b68-43d0-4acc-8954-e89984a0f520';
+    
+    AWS.config.update({
+    region: bucketRegion,
+    credentials: new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: IdentityPoolId
+    })
+    });
+    
+    var s3 = new AWS.S3({
+    apiVersion: '2006-03-01',
+    params: {Bucket: albumBucketName}
+    });
+    
+    return s3;
+  }
+  
+  
+  // could pass name of album to this function for specifying diff families
+  function addPhoto() {
+  
+  var s3 = configureS3();
+  
+  var albumName = 'FamilyName';
+  var files = document.getElementById('photoupload').files;
+  if (!files.length) {
+    return alert('Please choose a file to upload first.');
+  }
+  var file = files[0];
+  var fileName = file.name;
+  var albumPhotosKey = encodeURIComponent(albumName) + '/';
+  
+  var photoKey = albumPhotosKey + fileName;
+  s3.upload({
+    Key: photoKey,
+    Body: file,
+    ACL: 'public-read'
+  }, function(err, data) {
+    if (err) {
+      alert('There was an error uploading your photo: ', err.message);
+    }
+    alert('Successfully uploaded photo.');
+    viewAlbum(albumName);
+  });
+  }
+  </script>
 </html>
